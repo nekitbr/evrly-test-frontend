@@ -208,5 +208,13 @@ export class UserPage implements OnInit {
     }
   }
 
+  formatPhone(phone: string | number | undefined): string {
+    if (!phone) return '';
+    const p = phone.toString().replace(/\D/g, '');
+    if (p.length !== 10) return p; // Return as-is if it's not 10 digits
+
+    return `(${p.slice(0, 3)}) ${p.slice(3, 6)} ${p.slice(6)}`;
+  }
+
 }
 
