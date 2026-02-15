@@ -39,6 +39,15 @@ export class UserPage implements OnInit {
     return this.pageCache.has(this.currentPage() + 1);
   });
 
+  readonly availablePages = computed(() => {
+    this.cacheVersion(); // do not remove - re-computes when cacheVersion changes!
+    const pages: number[] = [];
+    for (const page of this.pageCache.keys()) {
+      pages.push(page);
+    }
+    return pages;
+  });
+
   ngOnInit() {
     this.loadUsers();
   }
@@ -183,6 +192,18 @@ export class UserPage implements OnInit {
     if (prevPageNum >= 1 && this.pageCache.has(prevPageNum)) {
       this.currentPage.set(prevPageNum);
       this.currentPageUsers.set(this.pageCache.get(prevPageNum)!);
+    }
+  }
+
+  goToPage(pageNumber: number) {
+    if (this.pageCache.has(pageNumber)) {
+      this.currentPage.set(pageNumber);
+      this.currentPageUsers.set(this.pageCache.get(pageNumber)!);
+
+      // Check if we need to fetch look-ahead pages
+      if (!this.pageCache.has(pageNumber + 1)) {
+        this.fetchNextPagesLookAhead(pageNumber + 1);
+      }
     }
   }
 }

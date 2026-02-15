@@ -135,7 +135,7 @@
           Página {{ currentPage() }} • {{ currentPageUsers().length }} usuários
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center justify-center gap-2">
           <button
             (click)="prevPage()"
             [disabled]="!canGoPrev()"
@@ -143,6 +143,22 @@
           >
             ← Anterior
           </button>
+
+          @for (page of availablePages(); track page) {
+            <button
+              (click)="goToPage(page)"
+              [class.bg-blue-600]="currentPage() === page"
+              [class.text-white]="currentPage() === page"
+              [class.bg-white]="currentPage() !== page"
+              [class.text-slate-700]="currentPage() !== page"
+              [class.border-slate-300]="currentPage() !== page"
+              [class.border-blue-600]="currentPage() === page"
+              class="px-3 py-2 text-sm font-medium border rounded-lg hover:bg-slate-50 transition-colors duration-150"
+              [disabled]="currentPage() === page"
+            >
+              {{ page }}
+            </button>
+          }
 
           <button
             (click)="nextPage()"
