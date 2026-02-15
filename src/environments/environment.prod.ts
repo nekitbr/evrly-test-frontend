@@ -1,5 +1,4 @@
 export const environment = {
   production: true,
-  apiBaseUrl: '',
+  apiBaseUrl: 'https://evrly-test-backend.vercel.app',
 };
-
