@@ -73,8 +73,8 @@
             d="M17 20h5v-2a3 3 0 00-5.856-1.488M15 6a3 3 0 11-6 0 3 3 0 016 0zM6 20h12a6 6 0 00-6-6 6 6 0 00-6 6z"
           ></path>
         </svg>
-        <h3 class="text-lg font-semibold text-slate-900 mb-2">Nenhum usuário encontrado</h3>
-        <p class="text-slate-600">Clique em "Executar" para sincronizar os usuários</p>
+        <h3 class="text-lg font-semibold text-slate-900 mb-2">No users found in database</h3>
+        <p class="text-slate-600">Click in "Execute" to synchronize users data</p>
       </div>
     }
 
@@ -121,8 +121,8 @@
                   <span class="text-sm text-slate-900">{{ user.email }}</span>
                 </div>
                 <div class="flex flex-col sm:flex-row sm:justify-between">
-                  <span class="text-xs text-slate-600 font-medium">Telefone:</span>
-                  <span class="text-sm text-slate-900">{{ user.phone }}</span>
+                  <span class="text-xs text-slate-600 font-medium">Phone:</span>
+                  <span class="text-sm text-slate-900">{{ formatPhone(user.phone) }}</span>
                 </div>
               </div>
             </div>
