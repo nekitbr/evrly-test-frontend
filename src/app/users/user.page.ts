@@ -21,7 +21,7 @@ import { FormsModule } from "@angular/forms";
 export class UserPage implements OnInit {
   private readonly userService = inject(UserService);
 
-  readonly itemsPerPageOptions = [1, 10, 25, 50];
+  readonly itemsPerPageOptions = [10, 25, 50];
   readonly currentPageUsers = signal<UserData[]>([]);
   readonly currentPage = signal(1);
   readonly itemsPerPage = signal(10);
@@ -30,7 +30,7 @@ export class UserPage implements OnInit {
   readonly isClearing = signal(false);
   readonly totalElements = signal(0);
   readonly error = signal<string | null>(null);
-  readonly cacheVersion = signal(0); // reactivity trigger for canGoNext - runs when cache changes
+  readonly cacheVersion = signal(0); // reactivity trigger for availablePages - runs when cache changes
 
   readonly pageCache = signal(new Map<number, UserData[]>());
 
