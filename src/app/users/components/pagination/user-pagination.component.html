@@ -1,0 +1,74 @@
+<div class="mt-8 flex flex-col lg:flex-row items-center justify-between gap-6 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+  <div class="flex items-center gap-4">
+    <label for="itemsPerPage" class="text-xs font-bold uppercase text-slate-400">Show:</label>
+    <select
+      [ngModel]="itemsPerPage()"
+      (ngModelChange)="itemsPerPageChange.emit($event)"
+      id="itemsPerPage"
+      class="pl-4 pr-10 py-2 text-sm font-bold border border-slate-200 rounded-xl bg-slate-50 cursor-pointer"
+    >
+      @for (option of options(); track option) {
+        <option [value]="option">{{ option }} rows</option>
+      }
+    </select>
+  </div>
+
+  <div class="text-sm font-medium text-slate-500">
+    Showing page <span class="text-slate-900 font-bold">{{ currentPage() }}</span>
+    <span class="mx-2 text-slate-300">|</span>
+    <span class="text-slate-900 font-bold">{{ itemsPerPage() }}</span> entries shown
+  </div>
+
+
+  <div class="flex items-center gap-2">
+    <button
+      (click)="prev.emit()"
+      [disabled]="currentPage() <= 1"
+      class="w-10 h-10 flex items-center justify-center border rounded-xl transition-all duration-150
+                     enabled:bg-white enabled:text-slate-700 enabled:border-slate-300 enabled:cursor-pointer
+                     enabled:hover:bg-slate-50 enabled:hover:border-slate-400
+                     disabled:bg-slate-50 disabled:text-slate-300 disabled:border-slate-100 disabled:cursor-not-allowed
+                     focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+      aria-label="Previous Page"
+    >
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+    </button>
+
+    <div class="flex items-center gap-1.5 px-2">
+      @for (page of availablePages(); track page) {
+        <button
+          (click)="goTo.emit(page)"
+          [disabled]="currentPage() === page"
+          class="w-10 h-10 text-sm font-bold border rounded-xl transition-all
+           disabled:bg-blue-600 disabled:text-white
+           enabled:bg-white enabled:text-slate-700 enabled:cursor-pointer">
+          {{ page }}
+        </button>
+      }
+    </div>
+
+    <button
+      (click)="next.emit()"
+      [disabled]="!hasNext()"
+      class="w-10 h-10 flex items-center justify-center border rounded-xl transition-all duration-150
+                     enabled:bg-white enabled:text-slate-700 enabled:border-slate-300 enabled:cursor-pointer
+                     enabled:hover:bg-slate-50 enabled:hover:border-slate-400
+                     disabled:bg-slate-50 disabled:text-slate-300 disabled:border-slate-100 disabled:cursor-not-allowed
+                     focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+      aria-label="Next Page"
+    >
+      @if (fetchingNextPages() && !hasNext()) {
+        <svg class="animate-spin h-4 w-4 text-blue-400" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      } @else {
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+      }
+    </button>
+  </div>
+</div>
