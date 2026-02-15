@@ -21,6 +21,7 @@ import { FormsModule } from "@angular/forms";
 export class UserPage implements OnInit {
   private readonly userService = inject(UserService);
 
+  readonly itemsPerPageOptions = [1, 10, 25, 50];
   readonly currentPageUsers = signal<UserData[]>([]);
   readonly currentPage = signal(1);
   readonly itemsPerPage = signal(10);
@@ -29,22 +30,14 @@ export class UserPage implements OnInit {
   readonly isClearing = signal(false);
   readonly totalElements = signal(0);
   readonly error = signal<string | null>(null);
-
-  readonly itemsPerPageOptions = [1, 10, 25, 50];
-
-  private readonly pageCache = new Map<number, UserData[]>();
   readonly cacheVersion = signal(0); // reactivity trigger for canGoNext - runs when cache changes
 
-  readonly canGoPrev = computed(() => this.currentPage() > 1);
-  readonly canGoNext = computed(() => {
-    this.cacheVersion(); // do not remove - re-computes when cacheVersion changes!
-    return this.pageCache.has(this.currentPage() + 1);
-  });
+  readonly pageCache = signal(new Map<number, UserData[]>());
 
   readonly availablePages = computed(() => {
     this.cacheVersion(); // do not remove - re-computes when cacheVersion changes!
     const pages: number[] = [];
-    for (const page of this.pageCache.keys()) {
+    for (const page of this.pageCache().keys()) {
       pages.push(page);
     }
     return pages.sort((a, b) => a - b);
@@ -58,7 +51,7 @@ export class UserPage implements OnInit {
     this.isLoading.set(true);
     this.error.set(null);
     this.currentPage.set(1);
-    this.pageCache.clear();
+    this.pageCache.set(new Map());
     this.loadPageWithLookAhead(1);
   }
 
@@ -66,13 +59,13 @@ export class UserPage implements OnInit {
    * Fetches current page + 2 next pages (3 pages in total with 1 request)
    */
   private loadPageWithLookAhead(pageNumber: number) {
-    if (this.pageCache.has(pageNumber)) {
+    if (this.pageCache().has(pageNumber)) {
       this.currentPage.set(pageNumber);
-      this.currentPageUsers.set(this.pageCache.get(pageNumber)!);
+      this.currentPageUsers.set(this.pageCache().get(pageNumber)!);
       this.isLoading.set(false);
 
       // check if we need to fetch the next pages as look-ahead
-      if (!this.pageCache.has(pageNumber + 1)) {
+      if (!this.pageCache().has(pageNumber + 1)) {
         this.fetchNextPagesLookAhead(pageNumber + 1);
       }
       return;
@@ -92,15 +85,18 @@ export class UserPage implements OnInit {
         const page2 = response.data.slice(itemsPerPage, itemsPerPage * 2);
         const page3 = response.data.slice(itemsPerPage * 2, itemsPerPage * 3);
 
-        if (page1.length > 0) {
-          this.pageCache.set(pageNumber, page1);
-        }
-        if (page2.length > 0) {
-          this.pageCache.set(pageNumber + 1, page2);
-        }
-        if (page3.length > 0) {
-          this.pageCache.set(pageNumber + 2, page3);
-        }
+        this.pageCache.update(map => {
+          if (page1.length > 0) {
+            map.set(pageNumber, page1);
+          }
+          if (page2.length > 0) {
+            map.set(pageNumber + 1, page2);
+          }
+          if (page3.length > 0) {
+            map.set(pageNumber + 2, page3);
+          }
+          return map
+        })
 
         this.currentPage.set(pageNumber);
         this.currentPageUsers.set(page1);
@@ -115,8 +111,8 @@ export class UserPage implements OnInit {
   }
 
   private fetchNextPagesLookAhead(pageNumber: number) {
-    if (this.pageCache.has(pageNumber)) {
-      return; // already cached
+    if (this.pageCache().has(pageNumber)) {
+      return;
     }
 
     const start = (pageNumber - 1) * this.itemsPerPage() + 1;
@@ -129,12 +125,15 @@ export class UserPage implements OnInit {
         const page1 = response.data.slice(0, itemsPerPage);
         const page2 = response.data.slice(itemsPerPage, itemsPerPage * 2);
 
-        if (page1.length > 0) {
-          this.pageCache.set(pageNumber, page1);
-        }
-        if (page2.length > 0) {
-          this.pageCache.set(pageNumber + 1, page2);
-        }
+        this.pageCache.update(map => {
+          if (page1.length > 0) {
+            map.set(pageNumber, page1);
+          }
+          if (page2.length > 0) {
+            map.set(pageNumber + 1, page2);
+          }
+          return map;
+        })
 
         this.cacheVersion.update(v => v + 1); // trigger reactivity
     });
@@ -165,7 +164,7 @@ export class UserPage implements OnInit {
         this.currentPageUsers.set([]);
         this.currentPage.set(1);
         this.totalElements.set(0);
-        this.pageCache.clear();
+        this.pageCache.set(new Map());
         this.isClearing.set(false);
       },
       error: (err) => {
@@ -178,11 +177,11 @@ export class UserPage implements OnInit {
   nextPage() {
     const nextPageNum = this.currentPage() + 1;
 
-    if (this.pageCache.has(nextPageNum)) {
+    if (this.pageCache().has(nextPageNum)) {
       this.currentPage.set(nextPageNum);
-      this.currentPageUsers.set(this.pageCache.get(nextPageNum)!);
+      this.currentPageUsers.set(this.pageCache().get(nextPageNum)!);
 
-      if (!this.pageCache.has(nextPageNum + 1)) {
+      if (!this.pageCache().has(nextPageNum + 1)) {
         this.fetchNextPagesLookAhead(nextPageNum + 1);
       }
     }
@@ -191,19 +190,19 @@ export class UserPage implements OnInit {
   prevPage() {
     const prevPageNum = this.currentPage() - 1;
 
-    if (prevPageNum >= 1 && this.pageCache.has(prevPageNum)) {
+    if (prevPageNum >= 1 && this.pageCache().has(prevPageNum)) {
       this.currentPage.set(prevPageNum);
-      this.currentPageUsers.set(this.pageCache.get(prevPageNum)!);
+      this.currentPageUsers.set(this.pageCache().get(prevPageNum)!);
     }
   }
 
   goToPage(pageNumber: number) {
-    if (this.pageCache.has(pageNumber)) {
+    if (this.pageCache().has(pageNumber)) {
       this.currentPage.set(pageNumber);
-      this.currentPageUsers.set(this.pageCache.get(pageNumber)!);
+      this.currentPageUsers.set(this.pageCache().get(pageNumber)!);
 
       // Check if we need to fetch look-ahead pages
-      if (!this.pageCache.has(pageNumber + 1)) {
+      if (!this.pageCache().has(pageNumber + 1)) {
         this.fetchNextPagesLookAhead(pageNumber + 1);
       }
     }

@@ -154,7 +154,7 @@
         <div class="flex flex-wrap items-center justify-center gap-2">
           <button
             (click)="prevPage()"
-            [disabled]="!canGoPrev()"
+            [disabled]="!(currentPage() > 1)"
             class="px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed transition-colors duration-150"
           >
             ← Anterior
@@ -178,7 +178,7 @@
 
           <button
             (click)="nextPage()"
-            [disabled]="!canGoNext()"
+            [disabled]="!pageCache().has(currentPage() + 1)"
             class="px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed transition-colors duration-150"
           >
             Próximo →
