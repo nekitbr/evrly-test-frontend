@@ -9,13 +9,13 @@ import {
 import { CommonModule } from '@angular/common';
 import { UserService } from './user.service';
 import { UserData } from './user.model';
+import { FormsModule } from "@angular/forms";
 
 @Component({
   selector: 'app-user',
   templateUrl: './user.page.html',
   styleUrls: ['./user.page.css'],
-  standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UserPage implements OnInit {
@@ -29,6 +29,8 @@ export class UserPage implements OnInit {
   readonly isClearing = signal(false);
   readonly totalElements = signal(0);
   readonly error = signal<string | null>(null);
+
+  readonly itemsPerPageOptions = [1, 10, 25, 50];
 
   private readonly pageCache = new Map<number, UserData[]>();
   readonly cacheVersion = signal(0); // reactivity trigger for canGoNext - runs when cache changes
@@ -45,7 +47,7 @@ export class UserPage implements OnInit {
     for (const page of this.pageCache.keys()) {
       pages.push(page);
     }
-    return pages;
+    return pages.sort((a, b) => a - b);
   });
 
   ngOnInit() {
@@ -206,5 +208,6 @@ export class UserPage implements OnInit {
       }
     }
   }
+
 }
 
